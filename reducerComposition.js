@@ -46,12 +46,19 @@ const visibilityFilter = (state = "SHOW_ALL", action) => {
 	}
 }
 
-const todoApp = (state = {}, action) => {
-	return {
-		todos: todos(state.todos, action),
-		visibilityFilter: visibilityFilter(state.visibilityFilter, action)
-	};
-}
+// combinedReducers() generated top level reducer
+// you don't have to write the top level reducer
+const { combineReducers } = Redux;
+const todoApp = combineReducers({
+	todos, visibilityFilter
+});
+
+// const todoApp = (state = {}, action) => {
+// 	return {
+// 		todos: todos(state.todos, action),
+// 		visibilityFilter: visibilityFilter(state.visibilityFilter, action)
+// 	};
+// }
 
 const { createStore } = Redux;
 const store = createStore(todoApp);
