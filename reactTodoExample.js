@@ -1,6 +1,7 @@
 const { combineReducers, createStore } = Redux;
 const { Component } = React;
 
+// Redux reducers
 const todo = (state, action) => {
   switch (action.type) {
     case 'ADD_TODO':
@@ -52,6 +53,7 @@ const todoApp = combineReducers({
 
 const store = createStore(todoApp);
 
+// React components
 const FilterLink = ({filter, currentFilter, children}) => {
   if (filter === currentFilter) {
     return (
@@ -74,6 +76,27 @@ const FilterLink = ({filter, currentFilter, children}) => {
     </a>
   );
 }
+
+const Todo = ({ text, completed, onClick}) => (
+  <li
+    onClick={onClick}
+    style={{ textDecoration: completed ? 'line-through': 'none' }}
+  >
+    {text}
+  </li>
+)
+
+const TodoList = ({ todos, onTodoClick }) => (
+  <ul>
+    {todos.map(todo =>
+      <Todo
+        key={todo.id}
+        {...todo}
+        onClick={() => onTodoClick(todo.id)}
+      />
+    )}
+  </ul>
+)
 
 const getVisibleTodos = (todos, filter) => {
   switch (filter) {
@@ -111,21 +134,15 @@ class TodoApp extends Component {
          }}>
           Add Todo
         </button>
-        <ul>
-          {visibleTodos.map(todo =>
-            <li
-              key={todo.id}
-              onClick={() => {
-                store.dispatch({
-                  type: 'TOGGLE_TODO',
-                  id: todo.id
-                });
-              }}
-              style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
-              >
-              {todo.text}
-            </li>
-          )}
+        <TodoList
+          todos={}
+          onTodoClick={id =>
+            store.dispatch({
+              type: 'TOGGLE_TODO',
+              id
+            });
+          }
+        />
         </ul>
         <p>
           Show:
