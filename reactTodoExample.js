@@ -51,29 +51,23 @@ const todoApp = combineReducers({
 	todos, visibilityFilter
 });
 
+// Redux store
 const store = createStore(todoApp);
 
-// React components
-const Link = ({ active, children, onClick }) => {
-  if (active) {
-    return (
-      <span>{children}</span>
-    );
+// Helper function
+const getVisibleTodos = (todos, filter) => {
+  switch (filter) {
+    case 'SHOW_ALL':
+      return todos;
+    case 'SHOW_COMPLETED':
+      return todos.filter(todo => todo.completed);
+    case 'SHOW_ACTIVE':
+      return todos.filter(todo => !todo.completed);
   }
-
-  return (
-    <a
-      href='#'
-      onClick={e => {
-        e.preventDefault();
-        onClick();
-      }}
-    >
-      {children}
-    </a>
-  );
 }
 
+// React components
+// Container components
 class FilterLink extends Component {
   componentDidMount() {
     this.unsubscribe = store.subscribe(() =>
@@ -103,6 +97,55 @@ class FilterLink extends Component {
       </Link>
     );
   }
+}
+
+class VisibleTodoList extends Component {
+  componentDidMount() {
+    this.unsubscribe = store.subscribe(() =>
+      this.forceUpdate()
+    );
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  render() {
+    const state = store.getState();
+    
+    return (
+      <TodoList
+        todos={getVisibleTodos(state.todos, state.visibilityFilter)}
+        onTodoClick={id =>
+          store.dispatch({
+            type: 'TOGGLE_TODO',
+            id
+          })
+        }
+      />
+    );
+  }
+}
+
+// Presentational components
+const Link = ({ active, children, onClick }) => {
+  if (active) {
+    return (
+      <span>{children}</span>
+    );
+  }
+
+  return (
+    <a
+      href='#'
+      onClick={e => {
+        e.preventDefault();
+        onClick();
+      }}
+    >
+      {children}
+    </a>
+  );
 }
 
 const Footer = () => (
@@ -177,47 +220,7 @@ const AddTodo = () => {
   );
 }
 
-const getVisibleTodos = (todos, filter) => {
-  switch (filter) {
-    case 'SHOW_ALL':
-      return todos;
-    case 'SHOW_COMPLETED':
-      return todos.filter(todo => todo.completed);
-    case 'SHOW_ACTIVE':
-      return todos.filter(todo => !todo.completed);
-    default:
-    return todos;
-  }
-}
-
-class VisibleTodoList extends Component {
-  componentDidMount() {
-    this.unsubscribe = store.subscribe(() =>
-      this.forceUpdate()
-    );
-  }
-
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
-
-  render() {
-    const state = store.getState();
-    
-    return (
-      <TodoList
-        todos={getVisibleTodos(state.todos, state.visibilityFilter)}
-        onTodoClick={id =>
-          store.dispatch({
-            type: 'TOGGLE_TODO',
-            id
-          })
-        }
-      />
-    );
-  }
-}
-
+// Main component
 const TodoApp = () => (
   <div>
     <AddTodo />
