@@ -1,5 +1,7 @@
 const { combineReducers, createStore } = Redux;
 const { Component } = React;
+const { Provider } = ReactRedux;
+const PropTypes = PropTypes;
 
 // Redux reducers
 const todo = (state, action) => {
@@ -51,9 +53,6 @@ const todoApp = combineReducers({
 	todos, visibilityFilter
 });
 
-// Redux store
-const store = createStore(todoApp);
-
 // Helper function
 const getVisibleTodos = (todos, filter) => {
   switch (filter) {
@@ -70,6 +69,7 @@ const getVisibleTodos = (todos, filter) => {
 // Container components
 class FilterLink extends Component {
   componentDidMount() {
+    const { store } = this.context;
     this.unsubscribe = store.subscribe(() =>
       this.forceUpdate()
     );
@@ -81,6 +81,7 @@ class FilterLink extends Component {
 
   render() {
     const props = this.props;
+    const { store } = this.context;
     const state = store.getState();
     
     return (
@@ -99,8 +100,13 @@ class FilterLink extends Component {
   }
 }
 
+FilterLink.contextTypes = {
+  store: PropTypes.object
+}
+
 class VisibleTodoList extends Component {
   componentDidMount() {
+    const { store} = this.context;
     this.unsubscribe = store.subscribe(() =>
       this.forceUpdate()
     );
@@ -111,6 +117,7 @@ class VisibleTodoList extends Component {
   }
 
   render() {
+    const { store} = this.context;
     const state = store.getState();
     
     return (
@@ -125,6 +132,10 @@ class VisibleTodoList extends Component {
       />
     );
   }
+}
+
+VisibleTodoList.contextTypes = {
+  store: PropTypes.object
 }
 
 // Presentational components
@@ -196,7 +207,7 @@ const TodoList = ({ todos, onTodoClick }) => (
 
 let nextTodoId = 0;
 
-const AddTodo = () => {
+const AddTodo = (props, { store }) => {
   let input;
 
   return (
@@ -220,6 +231,10 @@ const AddTodo = () => {
   );
 }
 
+AddTodo.contextTypes = {
+  store: PropTypes.object
+}
+
 // Main component
 const TodoApp = () => (
   <div>
@@ -231,6 +246,8 @@ const TodoApp = () => (
 
 
 ReactDOM.render(
-  <TodoApp />,
+  <Provider store={createStore(todoApp)}>
+    <TodoApp />
+  </Provider>,
   document.getElementById('root')
 );
